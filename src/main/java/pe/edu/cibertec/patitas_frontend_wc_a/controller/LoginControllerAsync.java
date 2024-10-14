@@ -64,4 +64,27 @@ public class LoginControllerAsync {
 
     }
 
+
+    @PostMapping("/close-async")
+    public Mono<ResponseClose> cerrarSesion(@RequestBody RequestClose request){
+        try{
+            return webClientAutenticacion.post()
+                    .uri("/close")
+                    .body(Mono.just(request),RequestClose.class)
+                    .retrieve()
+                    .bodyToMono(ResponseClose.class)
+                    .flatMap(response -> {
+                        if(response.codigo().equals("00")){
+                            return Mono.just(new ResponseClose("00","Sesión cerrada"));
+                        }else {
+                            return Mono.just(new ResponseClose("01","Hubo un problema en el servicio"));
+                        }
+                    });
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return Mono.just(new ResponseClose("99",e.getMessage()));
+        }
+    }
+
 }
+
